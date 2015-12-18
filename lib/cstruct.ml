@@ -87,7 +87,13 @@ let to_bigarray buffer =
   Bigarray.Array1.sub buffer.buffer buffer.off buffer.len
 
 let create len =
-  let buffer = Bigarray.(Array1.create char c_layout len) in
+  let buffer =
+    try Bigarray.(Array1.create char c_layout len)
+    with Out_of_memory ->
+      (* See: http://caml.inria.fr/mantis/view.php?id=7100 *)
+      print_endline "(deploying Bigarray GC workaround)";
+      Gc.compact ();
+      Bigarray.(Array1.create char c_layout len) in
   { buffer ; len ; off = 0 }
 
 let check_bounds t len =
