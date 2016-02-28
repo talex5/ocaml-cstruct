@@ -91,7 +91,8 @@ let create len =
     try Bigarray.(Array1.create char c_layout len)
     with Out_of_memory ->
       (* See: http://caml.inria.fr/mantis/view.php?id=7100 *)
-      print_endline "(deploying Bigarray GC workaround)";
+      Printf.printf "(deploying Bigarray GC workaround for allocation of %d bytes)\n%!" len;
+      Printexc.get_callstack 10 |> Printexc.print_raw_backtrace stdout;
       Gc.compact ();
       Bigarray.(Array1.create char c_layout len) in
   { buffer ; len ; off = 0 }
